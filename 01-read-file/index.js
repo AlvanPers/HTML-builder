@@ -1,7 +1,14 @@
 const fs = require('fs');
-fs.readFile('./01-read-file/text.txt', function (error, data) {
-  if (error) {
-    return console.log(error);
-  }
-  console.log(data.toString());
-});
+
+const readStream = fs.createReadStream('./01-read-file/text.txt', 'utf8');
+
+readStream
+  .on('data', function (chunk) {
+    console.log(chunk);
+  })
+  .on('end', function () {
+    console.log('Reading finished');
+  })
+  .on('error', function (err) {
+    console.log('An error has occurred: ' + err.message);
+  });

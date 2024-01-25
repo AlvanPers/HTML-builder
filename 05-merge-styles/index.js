@@ -1,42 +1,29 @@
 const fs = require('fs');
 const path = require('path');
 
-const stylesDir = path.join(__dirname, 'styles');
-const outputDir = path.join(__dirname, 'project-dist');
-const outputFile = path.join(outputDir, 'bundle.css');
-
-fs.readdir(stylesDir, (err, files) => {
-  if (err) {
-    return console.error('Unable to scan directory: ' + err);
+function mergeStyles(src, dest) {
+  // Создаем папку назначения, если она еще не существует
+  if (!fs.existsSync(dest)) {
+    fs.mkdirSync(dest, { recursive: true });
   }
 
-  let cssFiles = files.filter((file) => path.extname(file) === '.css');
+  // Читаем содержимое исходной папки
+  const entries = fs.readdirSync(src, { withFileTypes: true });
 
-  fs.mkdir(outputDir, { recursive: true }, (err) => {
-    if (err) {
-      return console.error('Unable to create directory: ' + err);
+  // Создаем поток записи для файла bundle.css
+  const writeStream = fs.createWriteStream(path.join(dest, 'bundle.css'));
+
+  for (let entry of entries) {
+    const srcPath = path.join(src, entry.name);
+
+    if (entry.isFile() && path.extname(srcPath) === '.css') {
+      // Если элемент является CSS-файлом, читаем его и записываем в bundle.css
+      const data = fs.readFileSync(srcPath, 'utf8');
+      writeStream.write(data);
     }
+  }
 
-    cssFiles.forEach((file, i) => {
-      let filePath = path.join(stylesDir, file);
+  writeStream.end();
+}
 
-      fs.readFile(filePath, 'utf8', (err, data) => {
-        if (err) {
-          return console.error('Unable to read file: ' + err);
-        }
-
-        fs.appendFile(outputFile, data + '\n', (err) => {
-          if (err) {
-            return console.error('Unable to write file: ' + err);
-          }
-
-          if (i === cssFiles.length - 1) {
-            console.log(
-              'Styles have been successfully compiled into bundle.css',
-            );
-          }
-        });
-      });
-    });
-  });
-});
+mergeStyles('./05-merge-styles/styles', './05-merge-styles/project-dist');
