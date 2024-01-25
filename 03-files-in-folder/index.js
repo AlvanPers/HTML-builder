@@ -2,12 +2,11 @@ const fs = require('fs');
 const path = require('path');
 
 const directoryPath = path.join(__dirname, 'secret-folder');
-//проверка каталога
 fs.readdir(directoryPath, function (err, files) {
   if (err) {
     return console.log('directory not found: ' + err);
   }
-  // console.log(directoryPath);
+
   files.forEach(function (file) {
     const filePath = path.join(directoryPath, file);
     fs.stat(filePath, function (err, stats) {
