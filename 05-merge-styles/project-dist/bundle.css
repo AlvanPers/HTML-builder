@@ -24,6 +24,13 @@ body {
   background-attachment: fixed;
 }
 
+.solar-syst {
+  margin: 0 auto;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
 .solar-syst:after {
   content: '';
   position: absolute;
