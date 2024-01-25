@@ -1,21 +1,23 @@
-const fs = require('fs');
+const fs = require('fs').promises;
 const path = require('path');
 
 async function copyDir(src, dest) {
-  if (!fs.existsSync(dest)) {
-    fs.mkdirSync(dest, { recursive: true });
+  try {
+    await fs.access(dest);
+  } catch {
+    await fs.mkdir(dest, { recursive: true });
   }
 
-  const srcEntries = fs.readdirSync(src, { withFileTypes: true });
-  const destEntries = fs.readdirSync(dest, { withFileTypes: true });
+  const srcEntries = await fs.readdir(src, { withFileTypes: true });
+  const destEntries = await fs.readdir(dest, { withFileTypes: true });
 
   for (let destEntry of destEntries) {
     if (!srcEntries.find((srcEntry) => srcEntry.name === destEntry.name)) {
       const destPath = path.join(dest, destEntry.name);
       if (destEntry.isDirectory()) {
-        fs.rmdirSync(destPath, { recursive: true });
+        await fs.rm(destPath, { recursive: true, force: true });
       } else {
-        fs.unlinkSync(destPath);
+        await fs.unlink(destPath);
       }
     }
   }
@@ -24,9 +26,9 @@ async function copyDir(src, dest) {
     const destPath = path.join(dest, srcEntry.name);
 
     if (srcEntry.isDirectory()) {
-      copyDir(srcPath, destPath);
+      await copyDir(srcPath, destPath);
     } else {
-      fs.copyFileSync(srcPath, destPath);
+      await fs.copyFile(srcPath, destPath);
     }
   }
 }
